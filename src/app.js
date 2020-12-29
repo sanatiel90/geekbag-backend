@@ -1,4 +1,5 @@
 import express from 'express'
+import path from 'path'
 import routes from './routes'
 
 import './database'
@@ -12,7 +13,13 @@ class App {
     }
 
     middlewares(){
-        this.server.use(express.json())
+        //middle para reconhecer json
+        this.server.use(express.json()) 
+
+        //middle usar recurso static do express na rota files; esse recurso permite acessar arquivos
+        //estáticos da aplicação, como as imagens armazenadas na pasta uploads
+        this.server.use('/files', express.static(path.resolve(__dirname, '..', 'tmp', 'uploads')))
+
     }
 
     routes(){

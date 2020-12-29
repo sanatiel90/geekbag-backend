@@ -1,56 +1,45 @@
 import * as Yup from 'yup';
 
+import Movie from './../models/Movie';
 import User from './../models/User';
-import File from './../models/File';
+import Category from './../models/Category';
 
-class UserController {
+class MovieController {
     async store(req, res){
 
         const schema = Yup.object().shape({
-            name: Yup.string().required(),
-            email: Yup.string().email().required(),
-            password: Yup.string().required().min(6),
+            title: Yup.string().required(), 
+            comment: Yup.string(),
+
         })
 
         if (!(await schema.isValid(req.body))){
             return res.status(400).json({ error: 'Erro de validação' }) 
         }
+        
 
-        const userExists = await User.findOne({ where: { email: req.body.email } })
-
-        if (userExists){
-            return res.status(400).json({ error: 'Usuário já existente' })
-        }
-
-        const { id, name, email, provider } = await User.create(req.body)
+        const { id, title, score, comment, category_id, user_id } = await Movie.create({
+            title: req.body.title,
+            score: req.body.score,
+            comment: req.body.comment,
+            category_id: req.body.category_id,
+            user_id: req.userId
+        })
 
         return res.json({
-            id, 
-            name,
-            email,
-            provider
+            id, title, score, comment, category_id, user_id
         })
     }
 
     async update(req, res){
-        const schema = Yup.object().shape({
-            name: Yup.string(),
-            email: Yup.string().email(),
-            oldpassword: Yup.string().min(6),
-            password: Yup.string().min(6)
-                .when('oldPassword', (oldPassword, field) => 
-                    oldPassword ? field.required() : field
-                ),
-            confirmPassword: Yup.string()
-                .when('password', (password, field) => 
-                    password ? field.required().oneOf([Yup.ref('password')]) : field
-                )
+        /*const schema = Yup.object().shape({
+            title: Yup.string(),
+            comment: Yup.string(),            
         })
 
         if (!(await schema.isValid(req.body))){
             return res.status(400).json({ error: 'Erro de validação' }) 
         }
-
 
         const { email, oldPassword } = req.body;
 
@@ -78,27 +67,33 @@ class UserController {
             id,
             name,
             email
-        })        
+        })        */
 
     }
 
 
     async index(req, res){
-        const users = await User.findAll({
-            attributes: ['id', 'name', 'email', 'avatar_id'],
+       /*  const movies = await Movie.findAll({
+            where: { user_id: req.userId },
+            attributes: ['id', 'title', 'score', 'comment', 'category_id', 'user_id'],
             include: [
                 {
-                    model: File,
-                    as: 'avatar',
-                    attributes: ['name', 'path', 'url']
+                    model: Category,
+                    as: 'category',
+                    attributes: ['title', 'type_id'],
+                }, 
+                {
+                    model: User,
+                    as: 'user',
+                    attributes: ['name', 'email']
                 }
             ]
         })
 
-        return res.json(users)
+        return res.json(movies)*/
     }
 
 
 }
 
-export default new UserController()
+export default new MovieController()
